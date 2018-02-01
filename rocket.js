@@ -4,18 +4,28 @@ import {Vector} from './vector.js';
 import {DNA} from './dna.js';
 
 export class Rocket{
-	constructor(canvas,ctx,target,dna=new DNA()){
+	constructor(canvas,ctx,target,dna,lifespanOption){
 		this.canvas = canvas;
 		this.ctx = ctx;
 		this.target = target;
 
-		this.pos = Vector.createVector(canvas.width / 2,canvas.height);
+		if(dna instanceof DNA){
+			this.lifespanOption = lifespanOption;
+			this.dna = new DNA(parseInt(lifespanOption.selectedOptions[0].innerText));
+		}else{
+			this.lifespanOption = null;
+			this.dna = new DNA(parseInt(dna.selectedOptions[0].innerText));
+		}
+
+		this.pos = Vector.createVector(canvas.width / 2,canvas.height - 10);
+		this.initPos = Vector.createVector(canvas.width / 2,canvas.height - 10);
 		this.vel = Vector.createVector();
 		this.acc = Vector.createVector();
 
-		this.dna = dna;
 		this.fitness = 0;
 		this.count = 0;
+		this.lifetime = 0;
+		this.distance = 0;
 
 		this.completed = false;
 		this.crashed = false;
@@ -28,17 +38,17 @@ export class Rocket{
 	}
 
 	calculateFitness(){
-		var dT = Vector.dist(this.pos,this.target);
+		let dT = Vector.dist(this.pos,this.target);
 
-		this.fitness = 1 / dT;
+		this.fitness = 10 / dT;
 
 		if(this.completed){
-			this.fitness *= 10;
+			this.fitness *= 100;
 		}
 
 		if(this.crashed){
-			this.fitness /= 10;
-		}
+			this.fitness *= 0.01;
+		}		
 	}
 
 	update(){
@@ -47,22 +57,22 @@ export class Rocket{
 			this.completed = true;
 		}
 
-		if(this.pos.x > obstacle.pos.x - obstacle.width / 2 &&
-			this.pos.x < obstacle.pos.x + obstacle.width / 2 &&
-			this.pos.y > obstacle.pos.y - obstacle.height / 2 &&
-			this.pos.y < obstacle.pos.y + obstacle.height / 2){
-			this.crashed = true;
-			this.isWinner = false;
-		}
-
-		if(this.pos.x < 0 || this.pos.x > this.canvas.width ||
-			this.pos.y < 0){
+		if((this.pos.x > obstacle.pos.x - obstacle.width / 2 &&
+				this.pos.x < obstacle.pos.x + obstacle.width / 2 &&
+				this.pos.y > obstacle.pos.y - obstacle.height / 2 &&
+				this.pos.y < obstacle.pos.y + obstacle.height / 2) ||
+				(this.pos.x < 0 || this.pos.x > this.canvas.width ||
+				this.pos.y < 0 || this.pos.y > this.canvas.height)){
 			this.crashed = true;
 			this.isWinner = false;
 		}
 
 		this.applyForce(this.dna.genes[this.count]);
 		this.count++;
+
+		if(!this.crashed){
+			this.lifetime++;
+		}
 
 		if(this.completed || this.crashed) return;
 
@@ -73,16 +83,16 @@ export class Rocket{
 
 	show(){
 		this.ctx.save(); 
-		this.ctx.fillStyle = "white";
 		if(this.completed){
 			this.ctx.fillStyle = "green";
-		}
-		if(this.isWinner){
+		}else if(this.crashed){
 			this.ctx.fillStyle = "red";
+		}else if(!this.completed && !this.isWinner){
+			this.ctx.fillStyle = "white";
 		}
 		this.ctx.translate(this.pos.x,this.pos.y);
 		this.ctx.rotate(this.vel.heading());
-		this.ctx.fillRect(-3,-13,6,26);
+		this.ctx.fillRect(-2.5,-13,5,26);
 		this.ctx.restore();
 	}
 }

@@ -3,8 +3,8 @@ export class Obstacle{
 		this.canvas = canvas;
 		this.ctx = ctx;
 
-		this.pos = {x:200,y:140};
-		this.width = 200;
+		this.pos = {x:canvas.width / 2,y:canvas.height / 2};
+		this.width = 300;
 		this.height = 10;
 	}
 

@@ -5,6 +5,7 @@
 
 .wrapper {
 	display: flex;
+	flex-direction: column;
 	width: 100%;
 	height: -webkit-fill-available;
 	align-items: center;
@@ -13,4 +14,8 @@
 
 canvas {
 	border: 1px solid black;
+}
+
+#Menu {
+	margin: 20px auto;
 }

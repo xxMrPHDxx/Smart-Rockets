@@ -1,9 +1,9 @@
 import {Vector} from './vector.js';
 
 export class DNA{
-	constructor(genes){
-		this.lifespan = 400;
-		this.maxForce = 0.2;
+	constructor(lifespan=300,genes){
+		this.lifespan = lifespan;
+		this.maxForce = 0.3;
 
 		if(genes) {
 			this.genes = genes;
@@ -29,7 +29,7 @@ export class DNA{
 			}
 		});
 
-		return new DNA(newGenes);
+		return new DNA(this.lifespan,newGenes);
 	}
 
 	mutation(){
