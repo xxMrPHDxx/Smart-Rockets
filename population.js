@@ -7,9 +7,12 @@ export class Population{
 		this.ctx = ctx;
 
 		this.rockets = [];
-		this.size = 100;
+		this.size = 150;
 
 		this.target = Vector.createVector(canvas.width/2,30);
+
+		this.showedBest = false;
+		this.bestRocket = null;
 
 		for(let i=0;i<this.size;i++){
 			this.rockets.push(new Rocket(canvas,ctx,this.target));
@@ -24,11 +27,15 @@ export class Population{
 			rocket.calculateFitness();
 			if(rocket.fitness > maxfit){
 				maxfit = rocket.fitness;
+				this.bestRocket = rocket;
 			}
 		});
 
 		this.rockets.forEach(rocket => {
 			rocket.fitness /= maxfit;
+			if(!this.bestRocket || rocket.fitness > this.bestRocket.fitness){
+				rocket.isWinner = true;
+			}
 		});
 
 		this.pool.splice(0);
@@ -61,16 +68,22 @@ export class Population{
 	}
 
 	selection(){
-		if(this.rockets.length >= 100) return;
+		if(this.rockets.length >= this.size) return;
 
 		this.rockets.forEach(rocket => {
-			let parentA = this.pool[Math.random() * this.pool.length | 0].dna;
-			let parentB = this.pool[Math.random() * this.pool.length | 0].dna;
-			let child = parentA.crossover(parentB);
+			let parentA = this.pool[Math.random() * this.pool.length | 0];
+			let parentB = this.pool[Math.random() * this.pool.length | 0];
+			let child = parentA.dna.crossover(parentB.dna);
 			child.mutation();
-			this.rockets.push(new Rocket(this.canvas,this.ctx,this.target,child));
+			let r = new Rocket(this.canvas,this.ctx,this.target,child);
+			r.isWinner = (parentA.isWinner || parentB.isWinner) ? true : false;
+			parentA.isWinner = false;
+			parentB.isWinner = false;
+			this.rockets.push(r);
 		});
 
 		this.rockets = this.rockets;
+
+		this.showedBest = false;
 	}
 }

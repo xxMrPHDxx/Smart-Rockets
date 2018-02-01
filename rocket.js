@@ -19,6 +19,8 @@ export class Rocket{
 
 		this.completed = false;
 		this.crashed = false;
+
+		this.isWinner = false;
 	}
 
 	applyForce(force){
@@ -27,7 +29,8 @@ export class Rocket{
 
 	calculateFitness(){
 		var dT = Vector.dist(this.pos,this.target);
-		this.fitness = (dT === 0) ? 1 : 1 / dT;
+
+		this.fitness = 1 / dT;
 
 		if(this.completed){
 			this.fitness *= 10;
@@ -40,7 +43,7 @@ export class Rocket{
 
 	update(){
 		let d = Vector.dist(this.pos,this.target);
-		if(d < 4){
+		if(d < 1){
 			this.completed = true;
 		}
 
@@ -49,11 +52,13 @@ export class Rocket{
 			this.pos.y > obstacle.pos.y - obstacle.height / 2 &&
 			this.pos.y < obstacle.pos.y + obstacle.height / 2){
 			this.crashed = true;
+			this.isWinner = false;
 		}
 
 		if(this.pos.x < 0 || this.pos.x > this.canvas.width ||
 			this.pos.y < 0){
 			this.crashed = true;
+			this.isWinner = false;
 		}
 
 		this.applyForce(this.dna.genes[this.count]);
@@ -68,7 +73,13 @@ export class Rocket{
 
 	show(){
 		this.ctx.save(); 
-		this.ctx.fillStyle = (this.completed) ? "red" : "#dfdfdf";
+		this.ctx.fillStyle = "white";
+		if(this.completed){
+			this.ctx.fillStyle = "green";
+		}
+		if(this.isWinner){
+			this.ctx.fillStyle = "red";
+		}
 		this.ctx.translate(this.pos.x,this.pos.y);
 		this.ctx.rotate(this.vel.heading());
 		this.ctx.fillRect(-3,-13,6,26);
